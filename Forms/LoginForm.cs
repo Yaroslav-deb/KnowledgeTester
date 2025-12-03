@@ -17,62 +17,95 @@ namespace KnowledgeTester1.Forms
         public LoginForm()
         {
             InitializeComponent();
-
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            var fullName = txtFullName.Text.Trim();
             var code = txtCode.Text.Trim();
 
-            if (string.IsNullOrEmpty(fullName) || string.IsNullOrEmpty(code))
+            if (string.IsNullOrEmpty(code))
             {
-                MessageBox.Show("Будь-ласка, заповніть поле з ім'ям та кодом доступа.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Будь-ласка, заповніть поле коду доступа.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
                 using var conn = DatabaseHelper.GetConnection();
-                using var cmd = new SqliteCommand("SELECT id, role, class_id, full_name FROM Users WHERE full_name = @fn AND personal_code = @pc", conn);
-                cmd.Parameters.AddWithValue("@fn", fullName);
-                cmd.Parameters.AddWithValue("@pc", code);
 
-                using var reader = cmd.ExecuteReader();
-                if (reader.Read())
+                using (var cmdAdmin = conn.CreateCommand())
                 {
-                    var id = reader.GetInt32(0);
-                    var role = reader.GetString(1);
-                    var classId = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2);
-                    var realName = reader.GetString(3);
+                    cmdAdmin.CommandText = "SELECT id, full_name FROM Admins WHERE personal_code = @pc";
+                    cmdAdmin.Parameters.AddWithValue("@pc", code);
 
-                    // Переключаемся по роли
-                    if (role == "student")
+                    using var reader = cmdAdmin.ExecuteReader();
+                    if (reader.Read())
                     {
-                        MessageBox.Show($"Ласкаво просимо, {realName}! (студент)", "Успішно", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        // Здесь откроем StudentForm (пока заглушка)
-                        //var f = new StudentForm(id, classId);
+                        var id = reader.GetInt32(0);
+                        var fullName = reader.GetString(1);
+
+                        MessageBox.Show($"Ласкаво просимо, {fullName}! (Admin)", "Успішно", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        // Форма Адміна
                         this.Hide();
-                        //f.FormClosed += (s, ev) => this.Show();
-                        //f.Show();
+                        // var f = new AdminForm(id);
+                        // f.FormClosed += (s, ev) => this.Show();
+                        // f.Show();
+                        return;
                     }
-                    else if (role == "teacher")
+                }
+
+                using (var cmdTeacher = conn.CreateCommand())
+                {
+                    cmdTeacher.CommandText = "SELECT id, full_name FROM Teachers WHERE personal_code = @pc";
+                    cmdTeacher.Parameters.AddWithValue("@pc", code);
+
+                    using var reader = cmdTeacher.ExecuteReader();
+                    if (reader.Read())
                     {
-                        MessageBox.Show($"Ласкаво просимо у систему, {realName}! (викладач)", "Успішно", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        var f = new TeacherForm(id);
+                        var id = reader.GetInt32(0);
+                        var fullName = reader.GetString(1);
+
+                        MessageBox.Show($"Ласкаво просимо, {fullName}! (Викладач)", "Успішно", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        var f = new TeacherForm(id, fullName);
+
                         this.Hide();
-                        f.FormClosed += (s, ev) => this.Show();
+
+                        f.FormClosed += (s, args) =>
+                        {
+                            this.Show();
+                            this.txtCode.Clear();
+                            this.txtCode.Focus();
+                        };
+
                         f.Show();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Роль поки у розроботці(admin).", "Информація", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
                     }
                 }
-                else
+
+                using (var cmdStudent = conn.CreateCommand())
                 {
-                    MessageBox.Show("Користувач з таким ПІБ та кодом не знайден.", "Помилка входа", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    cmdStudent.CommandText = "SELECT id, full_name, class_id FROM Students WHERE personal_code = @pc";
+                    cmdStudent.Parameters.AddWithValue("@pc", code);
+
+                    using var reader = cmdStudent.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        var id = reader.GetInt32(0);
+                        var fullName = reader.GetString(1);
+                        var classId = reader.GetInt32(2);
+
+                        MessageBox.Show($"Ласкаво просимо, {fullName}! (Студент)", "Успішно", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        // Форма студента
+                        // var f = new StudentForm(id, classId);
+                        this.Hide();
+                        // f.FormClosed += (s, ev) => this.Show();
+                        // f.Show();
+                        return;
+                    }
                 }
+
+                MessageBox.Show("Користувач з таким кодом не знайден.", "Помилка входа", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {

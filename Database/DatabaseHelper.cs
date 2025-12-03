@@ -7,19 +7,13 @@ namespace KnowledgeTester1.Database
 {
     public static class DatabaseHelper
     {
-        private static readonly string ProjectDir = 
+        private static readonly string ProjectDir =
             Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
 
-        // Папка Database в корне проекта
-        private static readonly string DbFolder =
-            Path.Combine(ProjectDir, "Database");
+        private static readonly string DbFolder = Path.Combine(ProjectDir, "Database");
+        private static readonly string DbPath = Path.Combine(DbFolder, "school.db");
 
-        // Путь к базе данных
-        private static readonly string DbPath =
-            Path.Combine(DbFolder, "school.db");
-
-        public static string ConnectionString =>
-            $"Data Source={DbPath}";
+        public static string ConnectionString => $"Data Source={DbPath}";
 
         public static void InitializeDatabase()
         {
@@ -32,7 +26,6 @@ namespace KnowledgeTester1.Database
 
                 if (needInit)
                 {
-                    // создаём пустую БД
                     using (var connection = new SqliteConnection(ConnectionString))
                     {
                         connection.Open();
@@ -43,18 +36,23 @@ namespace KnowledgeTester1.Database
                 {
                     conn.Open();
 
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "PRAGMA foreign_keys = ON;";
+                        cmd.ExecuteNonQuery();
+                    }
+
                     if (needInit)
                     {
-                        string sql = GetInitSql();
                         using var cmd = conn.CreateCommand();
-                        cmd.CommandText = sql;
+                        cmd.CommandText = GetInitSql();
                         cmd.ExecuteNonQuery();
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка инициализации БД: " + ex.Message);
+                MessageBox.Show("Помилка ініціалізації БД: " + ex.Message);
                 throw;
             }
         }
@@ -63,140 +61,203 @@ namespace KnowledgeTester1.Database
         {
             var conn = new SqliteConnection(ConnectionString);
             conn.Open();
+
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = "PRAGMA foreign_keys = ON;";
+                cmd.ExecuteNonQuery();
+            }
+
             return conn;
         }
 
         private static string GetInitSql()
         {
-            // Здесь я помещаю твой SQL. Если ты захочешь — можно вынести в файл .sql.
             return @"
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS ""Users""
-(
- id integer primary key autoincrement,
- full_name text not null,
- role text not null check (role in ('student', 'admin', 'teacher')),
- personal_code text unique not null,
- class_id integer,
- foreign key(class_id) references ""Classes""(id)
+-- Админ
+CREATE TABLE IF NOT EXISTS Admins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
+    personal_code TEXT UNIQUE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS ""Classes""
-(
- id integer primary key autoincrement,
- name text not null unique
+-- Классы
+CREATE TABLE IF NOT EXISTS Classes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS ""Tests""
-(
- id integer primary key autoincrement,
- title text not null,
- description text,
- class_id integer,
- teacher_id integer,
- foreign key (class_id) references ""Classes""(id),
- foreign key (teacher_id) references ""Users""(id)
+-- Учителя
+CREATE TABLE IF NOT EXISTS Teachers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
+    personal_code TEXT UNIQUE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS ""Questions""
-(
- id integer primary key autoincrement,
- test_id integer,
- question_text text not null,
- foreign key (test_id) references ""Tests""(id)
+-- Предметы
+CREATE TABLE IF NOT EXISTS Subjects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS ""Answers""
-(
- id integer primary key autoincrement,
- question_id integer,
- answer_text text not null,
- is_correct integer not null check(is_correct in (0, 1)),
- foreign key (question_id) references ""Questions""(id)
+-- Соответствие учителя к классам
+CREATE TABLE IF NOT EXISTS TeacherClasses (
+    teacher_id INTEGER NOT NULL,
+    class_id INTEGER NOT NULL,
+    FOREIGN KEY(teacher_id) REFERENCES Teachers(id) ON DELETE CASCADE,
+    FOREIGN KEY(class_id) REFERENCES Classes(id) ON DELETE CASCADE,
+    PRIMARY KEY(teacher_id, class_id)
 );
 
-CREATE TABLE IF NOT EXISTS ""Results""
-(
- id integer primary key autoincrement,
- student_id integer not null,
- test_id integer not null,
- score integer not null,
- max_score integer not null,
- ""date"" text not null,
- foreign key (student_id) references ""Users""(id),
- foreign key (test_id) references ""Tests""(id)
+-- Соответствие учителя к предметам
+CREATE TABLE IF NOT EXISTS TeacherSubjects (
+    teacher_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    FOREIGN KEY(teacher_id) REFERENCES Teachers(id) ON DELETE CASCADE,
+    FOREIGN KEY(subject_id) REFERENCES Subjects(id) ON DELETE CASCADE,
+    PRIMARY KEY(teacher_id, subject_id)
 );
 
--- Insert classes
-INSERT OR IGNORE INTO Classes (name) VALUES
-('7-А'),
-('9-А'),
-('10-А'),
-('11-А');
+-- Студенты
+CREATE TABLE IF NOT EXISTS Students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
+    personal_code TEXT UNIQUE NOT NULL,
+    class_id INTEGER NOT NULL,
+    FOREIGN KEY(class_id) REFERENCES Classes(id) ON DELETE CASCADE
+);
 
--- Teachers (5 for 7/9 and 5 for 10/11)
-INSERT OR IGNORE INTO ""Users""(full_name, role, personal_code, class_id) VALUES
-('Іваненко Марія Петрівна', 'teacher', 'TCH-001-A1', NULL),
-('Павлюк Сергій Олександрович', 'teacher', 'TCH-002-B4', NULL),
-('Коваль Анна Ігорівна', 'teacher', 'TCH-003-C2', NULL),
-('Бойко Олег Миколайович', 'teacher', 'TCH-004-D7', NULL),
-('Шевченко Оксана Василівна', 'teacher', 'TCH-005-E9', NULL),
-('Гриценко Микола Іванович', 'teacher', 'TCH-006-F3', NULL),
-('Дмитрук Наталія Степанівна', 'teacher', 'TCH-007-G8', NULL),
-('Лисенко Юрій Павлович', 'teacher', 'TCH-008-H5', NULL),
-('Мельник Світлана Андріївна', 'teacher', 'TCH-009-J1', NULL),
-('Онищук Роман Григорович', 'teacher', 'TCH-010-K4', NULL);
+-- Тесты
+CREATE TABLE IF NOT EXISTS Tests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT,
+    class_id INTEGER,
+    teacher_id INTEGER,
+    FOREIGN KEY(class_id) REFERENCES Classes(id),
+    FOREIGN KEY(teacher_id) REFERENCES Teachers(id)
+);
 
--- Students 7-A
-INSERT OR IGNORE INTO ""Users"" (full_name, role, personal_code, class_id) VALUES
-('Кравець Андрій Сергійович', 'student', 'STU7A-001', 1),
-('Мельник Софія Ігорівна', 'student', 'STU7A-002', 1),
-('Мазур Владислав Юрійович', 'student', 'STU7A-003', 1),
-('Мироненко Дарина Олегівна', 'student', 'STU7A-004', 1),
-('Гуменюк Максим Володимирович', 'student', 'STU7A-005', 1),
-('Мисько Аліна Петрівна', 'student', 'STU7A-006', 1),
-('Шеремета Денис Вадимович', 'student', 'STU7A-007', 1),
-('Гордійчук Лілія Миколаївна', 'student', 'STU7A-008', 1),
-('Котик Роман Андрійович', 'student', 'STU7A-009', 1);
+-- Вопросы
+CREATE TABLE IF NOT EXISTS Questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    test_id INTEGER,
+    question_text TEXT NOT NULL,
+    FOREIGN KEY(test_id) REFERENCES Tests(id) ON DELETE CASCADE
+);
 
--- Students 9-A
-INSERT OR IGNORE INTO ""Users"" (full_name, role, personal_code, class_id) VALUES
-('Білик Олександр Тарасович', 'student', 'STU9A-001', 2),
-('Проценко Анастасія Миколаївна', 'student', 'STU9A-002', 2),
-('Шевчук Дмитро Сергійович', 'student', 'STU9A-003', 2),
-('Калініна Анна Романівна', 'student', 'STU9A-004', 2),
-('Литвин Артем Олександрович', 'student', 'STU9A-005', 2),
-('Семенюк Вікторія Павлівна', 'student', 'STU9A-006', 2),
-('Кузьменко Назар Ігорович', 'student', 'STU9A-007', 2),
-('Петренко Богдан Михайлович', 'student', 'STU9A-008', 2),
-('Корнієнко Олена Василівна', 'student', 'STU9A-009', 2),
-('Сергієнко Ілля Валентинович', 'student', 'STU9A-010', 2);
+-- Ответы
+CREATE TABLE IF NOT EXISTS Answers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    question_id INTEGER,
+    answer_text TEXT NOT NULL,
+    is_correct INTEGER NOT NULL CHECK(is_correct IN (0,1)),
+    FOREIGN KEY(question_id) REFERENCES Questions(id) ON DELETE CASCADE
+);
 
--- Students 10-A
-INSERT OR IGNORE INTO ""Users"" (full_name, role, personal_code, class_id) VALUES
-('Гаврилюк Іван Миколайович', 'student', 'STU10A-001', 3),
-('Романюк Марія Олегівна', 'student', 'STU10A-002', 3),
-('Шпортко Андрій Віталійович', 'student', 'STU10A-003', 3),
-('Савчук Діана Степанівна', 'student', 'STU10A-004', 3),
-('Захарченко Емма Сергіївна', 'student', 'STU10A-005', 3),
-('Пилипчук Данило Васильович', 'student', 'STU10A-006', 3),
-('Бородай Лілія Орестівна', 'student', 'STU10A-007', 3),
-('Горобець Назар Петрович', 'student', 'STU10A-008', 3);
+-- Результаты
+CREATE TABLE IF NOT EXISTS Results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    test_id INTEGER NOT NULL,
+    score INTEGER NOT NULL,
+    max_score INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    FOREIGN KEY(student_id) REFERENCES Students(id),
+    FOREIGN KEY(test_id) REFERENCES Tests(id)
+);
 
--- Students 11-A
-INSERT OR IGNORE INTO ""Users"" (full_name, role, personal_code, class_id) VALUES
-('Сидоренко Марк Олексійович', 'student', 'STU11A-001', 4),
-('Левченко Софія Богданівна', 'student', 'STU11A-002', 4),
-('Ткаченко Владислав Петрович', 'student', 'STU11A-003', 4),
-('Гуменна Ольга Михайлівна', 'student', 'STU11A-004', 4),
-('Дяченко Микита Сергійович', 'student', 'STU11A-005', 4),
-('Сушко Анастасія Юріївна', 'student', 'STU11A-006', 4),
-('Маслюк Олександра Олегівна', 'student', 'STU11A-007', 4),
-('Кирилюк Максим Андрійович', 'student', 'STU11A-008', 4),
-('Горчак Тетяна Степанівна', 'student', 'STU11A-009', 4),
-('Капустін Павло Ілліч', 'student', 'STU11A-010', 4),
-('Сич Олексій Дмитрович', 'student', 'STU11A-011', 4);
+-- 
+INSERT INTO Admins (full_name, personal_code) VALUES
+('Головний Адміністратор','admin123');
+
+INSERT INTO Classes (name) VALUES
+('6-А'),('7-А'),('8-А'),('9-А'),('10-А'),('11-А');
+
+-- Предмети
+INSERT INTO Subjects (name) VALUES
+('Математика'),('Фізика'),('Хімія'),('Історія'),('Географія'),('Література');
+
+-- Вчителі
+INSERT INTO Teachers (full_name, personal_code) VALUES
+('Ковальчук Ірина Василівна', 'T1'),      -- Математика
+('Шевченко Петро Олексійович', 'T2'),     -- Фізика
+('Мельник Оксана Іванівна', 'T3'),        -- Хімія
+('Бондаренко Андрій Сергійович', 'T4'),   -- Історія
+('Ткаченко Наталія Володимирівна', 'T5'), -- Географія
+('Кравченко Віктор Миколайович', 'T6'),   -- Література/Математика
+('Олійник Марія Юріївна', 'T7'),          -- Фізика/Хімія
+('Поліщук Сергій Дмитрович', 'T8'),       -- Історія/Математика
+('Лисенко Ганна Павлівна', 'T9'),         -- Географія/Хімія
+('Бойко Володимир Тарасович', 'T10');     -- Історія/Географія/Література
+
+-- TeacherClasses
+INSERT INTO TeacherClasses (teacher_id, class_id) VALUES
+(1,1),(1,2),(1,3),(1,4),
+(2,1),(2,2),(2,3),(2,4),
+(3,1),(3,2),(3,3),(3,4),
+(4,1),(4,2),(4,3),(4,4),
+(5,1),(5,2),(5,3),(5,4),
+(6,5),(6,6),
+(7,5),(7,6),
+(8,5),(8,6),
+(9,5),(9,6),
+(10,5),(10,6);
+
+-- TeacherSubjects
+INSERT INTO TeacherSubjects (teacher_id, subject_id) VALUES
+(1,1),(2,2),(3,3),(4,4),(4,5),(5,5),(5,6),
+(6,1),(6,2),(7,2),(7,3),(8,4),(8,1),(9,5),(9,3),(10,4),(10,5),(10,6);
+
+-- Students 6-А
+INSERT INTO Students (full_name, personal_code, class_id) VALUES
+('Іваненко Максим Сергійович','S6A1',1),
+('Петренко Софія Андріївна','S6A2',1),
+('Сидоренко Дмитро Олександрович','S6A3',1),
+('Коваленко Анастасія Іванівна','S6A4',1),
+('Григоренко Артем Павлович','S6A5',1);
+
+-- Students 7-А
+INSERT INTO Students (full_name, personal_code, class_id) VALUES
+('Данилюк Вероніка Олексіївна','S7A1',2),
+('Гаврилюк Богдан Миколайович','S7A2',2),
+('Тимошенко Юлія Володимирівна','S7A3',2),
+('Романенко Денис Юрійович','S7A4',2),
+('Василенко Вікторія Олегівна','S7A5',2);
+
+-- Students 8-А
+INSERT INTO Students (full_name, personal_code, class_id) VALUES
+('Павленко Олександр Ігорович','S8A1',3),
+('Левченко Дар''я Максимівна','S8A2',3),
+('Кузьменко Владислав Тарасович','S8A3',3),
+('Білоус Катерина Сергіївна','S8A4',3),
+('Мороз Назар Андрійович','S8A5',3);
+
+-- Students 9-А
+INSERT INTO Students (full_name, personal_code, class_id) VALUES
+('Руденко Євгеній Вікторович','S9A1',4),
+('Кравчук Аліна Дмитрівна','S9A2',4),
+('Захарченко Ігор Романович','S9A3',4),
+('Карпенко Маргарита Олександрівна','S9A4',4),
+('Демченко Станіслав Вадимович','S9A5',4);
+
+-- Students 10-А
+INSERT INTO Students (full_name, personal_code, class_id) VALUES
+('Савченко Олег Петрович','S10A1',5),
+('Гончар Ольга Миколаївна','S10A2',5),
+('Мазур Антон Васильович','S10A3',5),
+('Степаненко Єлизавета Юріївна','S10A4',5),
+('Вовк Роман Григорович','S10A5',5);
+
+-- Students 11-А
+INSERT INTO Students (full_name, personal_code, class_id) VALUES
+('Козак Ярослав Володимирович','S11A1',6),
+('Нестеренко Марина Анатоліївна','S11A2',6),
+('Попович Андрій Олександрович','S11A3',6),
+('Марченко Діана Віталіївна','S11A4',6),
+('Шульга Валентин Сергійович','S11A5',6);
 ";
         }
     }
