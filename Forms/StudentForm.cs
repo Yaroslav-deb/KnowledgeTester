@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.Linq; // Додали для зручної роботи зі списками
+using System.Linq;
 using System.Windows.Forms;
 
 namespace KnowledgeTester1.Forms
@@ -31,12 +31,10 @@ namespace KnowledgeTester1.Forms
             LoadSubjects();
         }
 
-        // Допоміжний клас для групування
         private class SubjectGroup
         {
             public int SubjectId { get; set; }
             public string SubjectName { get; set; }
-            // Список вчителів (ID та Ім'я) для цього предмета
             public List<(int Id, string Name)> Teachers { get; set; } = new List<(int, string)>();
         }
 
@@ -44,8 +42,6 @@ namespace KnowledgeTester1.Forms
         {
             flowLayoutPanel.Controls.Clear();
 
-            // Словник для зберігання унікальних предметів
-            // Key: SubjectID, Value: Інформація про предмет і список вчителів
             var subjectsMap = new Dictionary<int, SubjectGroup>();
 
             try
@@ -76,7 +72,6 @@ namespace KnowledgeTester1.Forms
                     int teachId = reader.GetInt32(2);
                     string teachName = reader.GetString(3);
 
-                    // Якщо такого предмета ще немає в списку - додаємо
                     if (!subjectsMap.ContainsKey(subjId))
                     {
                         subjectsMap[subjId] = new SubjectGroup
@@ -86,7 +81,6 @@ namespace KnowledgeTester1.Forms
                         };
                     }
 
-                    // Додаємо вчителя до цього предмета (якщо його там ще немає)
                     var group = subjectsMap[subjId];
                     if (!group.Teachers.Any(t => t.Id == teachId))
                     {
@@ -94,7 +88,6 @@ namespace KnowledgeTester1.Forms
                     }
                 }
 
-                // Тепер проходимо по згрупованим предметам і створюємо кнопки
                 foreach (var group in subjectsMap.Values)
                 {
                     CreateSubjectTile(group);
@@ -117,15 +110,12 @@ namespace KnowledgeTester1.Forms
             btn.Cursor = Cursors.Hand;
             btn.Margin = new Padding(15);
 
-            // Формуємо список імен вчителів через кому або з нового рядка
-            // Наприклад: "Іваненко І.І., Петров П.П."
             string teachersText = string.Join(",\n", group.Teachers.Select(t => t.Name));
 
             btn.Text = $"{group.SubjectName}\n\n----------\n{teachersText}";
             btn.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btn.TextAlign = ContentAlignment.MiddleCenter;
 
-            // Зберігаємо дані в Tag (нам знадобиться SubjectId та список TeacherIds)
             btn.Tag = group;
 
             btn.Click += SubjectTile_Click;
@@ -138,24 +128,18 @@ namespace KnowledgeTester1.Forms
             Button btn = sender as Button;
             if (btn?.Tag is SubjectGroup group)
             {
-                // 1. Ховаємо StudentForm
                 this.Hide();
 
-                // 2. Створюємо StudentTestsForm
                 var f = new StudentTestsForm(_studentId, _studentName, _classId, group.SubjectId, group.SubjectName, this);
 
-                // 3. Обробляємо закриття дочірньої форми
                 f.FormClosed += (s, args) =>
                 {
-                    // Перевіряємо, чи натиснув студент "Вийти" в тій формі
                     if (f.IsLogoutRequested)
                     {
-                        // Якщо там натиснули "Вийти", ми теж натискаємо "Вийти" тут
                         this.btnExit_Click(null, null);
                     }
                     else
                     {
-                        // Якщо просто натиснули "Назад", ми показуємося знову
                         this.Show();
                     }
                 };

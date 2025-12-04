@@ -22,7 +22,6 @@ namespace KnowledgeTester1.Forms
             btnSave = new Button();
             lblAnswer = new Label();
             SuspendLayout();
-
             // 
             // lblAnswer
             // 
@@ -34,7 +33,6 @@ namespace KnowledgeTester1.Forms
             lblAnswer.Size = new Size(138, 23);
             lblAnswer.TabIndex = 3;
             lblAnswer.Text = "Текст відповіді:";
-
             // 
             // txtAnswer
             // 
@@ -46,7 +44,6 @@ namespace KnowledgeTester1.Forms
             txtAnswer.Name = "txtAnswer";
             txtAnswer.Size = new Size(420, 30);
             txtAnswer.TabIndex = 0;
-
             // 
             // chkCorrect
             // 
@@ -59,7 +56,6 @@ namespace KnowledgeTester1.Forms
             chkCorrect.TabIndex = 1;
             chkCorrect.Text = "Це правильна відповідь?";
             chkCorrect.UseVisualStyleBackColor = true;
-
             // 
             // btnSave
             // 
@@ -76,7 +72,6 @@ namespace KnowledgeTester1.Forms
             btnSave.Text = "Зберегти відповідь";
             btnSave.UseVisualStyleBackColor = false;
             btnSave.Click += btnSave_Click;
-
             // 
             // AnswerEditorForm
             // 

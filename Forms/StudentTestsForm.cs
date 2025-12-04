@@ -155,7 +155,6 @@ namespace KnowledgeTester1.Forms
                 string title = dgvHistory.CurrentRow.Cells["Назва тесту"].Value.ToString();
                 string date = dgvHistory.CurrentRow.Cells["Дата здачі"].Value.ToString();
 
-                // Використовуємо приховані колонки
                 int score = Convert.ToInt32(dgvHistory.CurrentRow.Cells["RawScore"].Value);
                 int max = Convert.ToInt32(dgvHistory.CurrentRow.Cells["RawMax"].Value);
 

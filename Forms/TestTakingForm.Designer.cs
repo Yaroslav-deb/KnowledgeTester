@@ -28,21 +28,19 @@ namespace KnowledgeTester1.Forms
             progressBar = new ProgressBar();
 
             SuspendLayout();
-
             // 
-            // lblStudentInfo (Верхній лівий кут)
+            // lblStudentInfo
             // 
             lblStudentInfo.AutoSize = true;
             lblStudentInfo.Font = new Font("Segoe UI", 10F);
             lblStudentInfo.ForeColor = Color.Plum;
             lblStudentInfo.Location = new Point(20, 20);
             lblStudentInfo.Name = "lblStudentInfo";
-            lblStudentInfo.Size = new Size(100, 23);
+            lblStudentInfo.Size = new Size(150, 23);
             lblStudentInfo.TabIndex = 0;
             lblStudentInfo.Text = "Студент: ...";
-
             // 
-            // btnBack (Верхній правий кут - переривання тесту)
+            // btnBack
             // 
             btnBack.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnBack.BackColor = Color.Gray;
@@ -55,12 +53,11 @@ namespace KnowledgeTester1.Forms
             btnBack.Name = "btnBack";
             btnBack.Size = new Size(100, 35);
             btnBack.TabIndex = 1;
-            btnBack.Text = "Вийти"; // Або "Перервати"
+            btnBack.Text = "Вийти";
             btnBack.UseVisualStyleBackColor = false;
             btnBack.Click += btnBack_Click;
-
             // 
-            // lblTestTitle (Центр зверху)
+            // lblTestTitle
             // 
             lblTestTitle.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             lblTestTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
@@ -71,18 +68,16 @@ namespace KnowledgeTester1.Forms
             lblTestTitle.TabIndex = 2;
             lblTestTitle.Text = "Назва тесту";
             lblTestTitle.TextAlign = ContentAlignment.TopCenter;
-
             // 
-            // progressBar (Прогрес проходження)
+            // progressBar
             // 
             progressBar.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             progressBar.Location = new Point(20, 70);
             progressBar.Name = "progressBar";
             progressBar.Size = new Size(940, 10);
             progressBar.TabIndex = 3;
-
             // 
-            // lblQuestionCounter (Номер питання)
+            // lblQuestionCounter
             // 
             lblQuestionCounter.AutoSize = true;
             lblQuestionCounter.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
@@ -92,12 +87,11 @@ namespace KnowledgeTester1.Forms
             lblQuestionCounter.Size = new Size(138, 28);
             lblQuestionCounter.TabIndex = 4;
             lblQuestionCounter.Text = "Питання 1/5";
-
             // 
-            // txtQuestionText (Текст самого питання)
+            // txtQuestionText
             // 
             txtQuestionText.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtQuestionText.BackColor = Color.FromArgb(20, 20, 20); // Зливається з фоном
+            txtQuestionText.BackColor = Color.FromArgb(20, 20, 20);
             txtQuestionText.BorderStyle = BorderStyle.None;
             txtQuestionText.Font = new Font("Segoe UI", 14F);
             txtQuestionText.ForeColor = Color.White;
@@ -105,24 +99,22 @@ namespace KnowledgeTester1.Forms
             txtQuestionText.Multiline = true;
             txtQuestionText.Name = "txtQuestionText";
             txtQuestionText.ReadOnly = true;
-            txtQuestionText.Size = new Size(940, 100); // Висота для тексту
+            txtQuestionText.Size = new Size(940, 100);
             txtQuestionText.TabIndex = 5;
             txtQuestionText.Text = "Текст питання...";
-
             // 
-            // flowAnswers (Контейнер для варіантів)
+            // flowAnswers
             // 
             flowAnswers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             flowAnswers.AutoScroll = true;
-            flowAnswers.FlowDirection = FlowDirection.TopDown; // Відповіді одна під одною
+            flowAnswers.FlowDirection = FlowDirection.TopDown;
             flowAnswers.WrapContents = false;
             flowAnswers.Location = new Point(20, 250);
             flowAnswers.Name = "flowAnswers";
             flowAnswers.Size = new Size(940, 250);
             flowAnswers.TabIndex = 6;
-
             // 
-            // btnPrev (Кнопка Назад - по питаннях)
+            // btnPrev
             // 
             btnPrev.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnPrev.BackColor = Color.FromArgb(72, 61, 139);
@@ -138,12 +130,11 @@ namespace KnowledgeTester1.Forms
             btnPrev.Text = "<< Назад";
             btnPrev.UseVisualStyleBackColor = false;
             btnPrev.Click += btnPrev_Click;
-
             // 
-            // btnNext (Кнопка Далі / Завершити)
+            // btnNext
             // 
             btnNext.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnNext.BackColor = Color.LimeGreen; // Зелений для дії вперед
+            btnNext.BackColor = Color.LimeGreen;
             btnNext.Cursor = Cursors.Hand;
             btnNext.FlatAppearance.BorderSize = 0;
             btnNext.FlatStyle = FlatStyle.Flat;
@@ -156,7 +147,6 @@ namespace KnowledgeTester1.Forms
             btnNext.Text = "Далі >>";
             btnNext.UseVisualStyleBackColor = false;
             btnNext.Click += btnNext_Click;
-
             // 
             // TestTakingForm
             // 

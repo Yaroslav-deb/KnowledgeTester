@@ -6,19 +6,15 @@ namespace KnowledgeTester1.Forms
 {
     public partial class TestResultForm : Form
     {
-        // Оновлений конструктор приймає назву та дату (опціонально)
         public TestResultForm(int score, int maxScore, string testTitle = "Тестування", string dateTaken = null)
         {
             InitializeComponent();
 
-            // Якщо передали назву тесту - показуємо її
             lblTitle.Text = testTitle;
 
-            // Якщо це історія (передали дату), змінимо текст кнопки на "Закрити"
             if (dateTaken != null)
             {
                 btnFinish.Text = "Закрити";
-                // Можна додати дату у підзаголовок (використаємо lblMessage для цього або lblTitle)
                 lblTitle.Text += $"\n({dateTaken})";
             }
 

@@ -15,20 +15,16 @@ namespace KnowledgeTester1.Forms
         private readonly int _testId;
         private readonly Form _parentForm;
 
-        // Структура для зберігання питання
         private class QuestionInfo
         {
             public int Id { get; set; }
             public string Text { get; set; }
         }
 
-        // Список усіх питань тесту
         private List<QuestionInfo> _questions = new List<QuestionInfo>();
 
-        // Поточний індекс питання (0, 1, 2...)
         private int _currentIndex = 0;
 
-        // Словник відповідей студента: <ID Питання, ID Вибраної Відповіді>
         private Dictionary<int, int> _userAnswers = new Dictionary<int, int>();
 
         private bool _isNavigateBack = false;
@@ -78,7 +74,6 @@ namespace KnowledgeTester1.Forms
                     });
                 }
 
-                // Налаштування прогрес-бару
                 progressBar.Minimum = 0;
                 progressBar.Maximum = _questions.Count;
                 progressBar.Value = 0;
@@ -91,25 +86,22 @@ namespace KnowledgeTester1.Forms
 
         private void LoadCurrentQuestion()
         {
-            // Очищаємо попередні відповіді
             flowAnswers.Controls.Clear();
 
             if (_currentIndex < 0 || _currentIndex >= _questions.Count) return;
 
             var q = _questions[_currentIndex];
 
-            // Відображаємо текст і номер
             txtQuestionText.Text = q.Text;
             lblQuestionCounter.Text = $"Питання {_currentIndex + 1} з {_questions.Count}";
             progressBar.Value = _currentIndex + 1;
 
-            // Керування кнопками
             btnPrev.Enabled = _currentIndex > 0;
 
             if (_currentIndex == _questions.Count - 1)
             {
                 btnNext.Text = "Завершити тест";
-                btnNext.BackColor = Color.OrangeRed; // Колір уваги
+                btnNext.BackColor = Color.OrangeRed;
             }
             else
             {
@@ -117,7 +109,6 @@ namespace KnowledgeTester1.Forms
                 btnNext.BackColor = Color.LimeGreen;
             }
 
-            // Завантажуємо варіанти відповідей для цього питання
             try
             {
                 using var conn = DatabaseHelper.GetConnection();
@@ -131,24 +122,21 @@ namespace KnowledgeTester1.Forms
                     int ansId = reader.GetInt32(0);
                     string ansText = reader.GetString(1);
 
-                    // Створюємо RadioButton
                     RadioButton rb = new RadioButton();
                     rb.Text = ansText;
-                    rb.Tag = ansId; // Ховаємо ID відповіді
+                    rb.Tag = ansId;
                     rb.AutoSize = true;
                     rb.Font = new Font("Segoe UI", 12F);
                     rb.ForeColor = Color.White;
                     rb.Margin = new Padding(10);
                     rb.Padding = new Padding(5);
-                    rb.Width = flowAnswers.Width - 40; // Ширина майже на весь екран
+                    rb.Width = flowAnswers.Width - 40;
 
-                    // Якщо ми вже відповідали на це питання раніше - відновлюємо вибір
                     if (_userAnswers.ContainsKey(q.Id) && _userAnswers[q.Id] == ansId)
                     {
                         rb.Checked = true;
                     }
 
-                    // Додаємо подію вибору (зберігаємо відповідь відразу при кліку)
                     rb.CheckedChanged += (s, e) =>
                     {
                         if (rb.Checked)
@@ -166,8 +154,6 @@ namespace KnowledgeTester1.Forms
             }
         }
 
-        // --- НАВІГАЦІЯ ---
-
         private void btnPrev_Click(object sender, EventArgs e)
         {
             if (_currentIndex > 0)
@@ -179,7 +165,6 @@ namespace KnowledgeTester1.Forms
 
         private void btnNext_Click(object sender, EventArgs e)
         {
-            // Перевіряємо, чи вибрав студент відповідь (опціонально, можна дозволяти пропускати)
             var currentQId = _questions[_currentIndex].Id;
             if (!_userAnswers.ContainsKey(currentQId))
             {
@@ -189,13 +174,11 @@ namespace KnowledgeTester1.Forms
 
             if (_currentIndex < _questions.Count - 1)
             {
-                // Перехід до наступного
                 _currentIndex++;
                 LoadCurrentQuestion();
             }
             else
             {
-                // Це було останнє питання -> Фініш
                 FinishTest();
             }
         }
@@ -208,22 +191,18 @@ namespace KnowledgeTester1.Forms
                 return;
             }
 
-            // 1. Рахуємо бали
             int correctCount = 0;
 
             try
             {
                 using var conn = DatabaseHelper.GetConnection();
 
-                // Отримуємо правильні відповіді для всіх питань тесту
                 foreach (var q in _questions)
                 {
-                    // Якщо студент не відповів на питання, пропускаємо (буде 0 балів за нього)
                     if (!_userAnswers.ContainsKey(q.Id)) continue;
 
                     int studentAnsId = _userAnswers[q.Id];
 
-                    // Перевіряємо в БД, чи правильна ця відповідь
                     using var cmd = conn.CreateCommand();
                     cmd.CommandText = "SELECT is_correct FROM Answers WHERE id = @id";
                     cmd.Parameters.AddWithValue("@id", studentAnsId);
@@ -235,8 +214,6 @@ namespace KnowledgeTester1.Forms
                     }
                 }
 
-                // 2. Зберігаємо результат в БД
-                // score = к-сть правильних, max_score = загальна к-сть питань
                 using var cmdInsert = conn.CreateCommand();
                 cmdInsert.CommandText = @"
                     INSERT INTO Results (student_id, test_id, score, max_score, date)
@@ -250,13 +227,8 @@ namespace KnowledgeTester1.Forms
 
                 cmdInsert.ExecuteNonQuery();
 
-                // ЗАМІСТЬ MessageBox ПИШЕМО ЦЕ:
-
-                // 3. Відкриваємо форму результатів як діалог
                 var resultForm = new TestResultForm(correctCount, _questions.Count);
-                resultForm.ShowDialog(); // Чекаємо, поки студент натисне "До списку тестів"
 
-                // 4. Після закриття результатів - виходимо з тесту
                 _isNavigateBack = true;
                 this.Close();
             }
@@ -282,11 +254,9 @@ namespace KnowledgeTester1.Forms
             {
                 if (_parentForm != null && !_parentForm.IsDisposed)
                 {
-                    // Оновлюємо списки тестів (щоб цей тест перемістився в історію)
-                    // Для цього треба зробити метод LoadAvailableTests публічним у StudentTestsForm (аналогічно як ми робили раніше)
                     if (_parentForm is StudentTestsForm stf)
                     {
-                        // stf.RefreshTables(); // Треба буде створити такий метод
+                        //stf.RefreshTables(); // Треба буде створити такий метод
                     }
                     _parentForm.Show();
                 }

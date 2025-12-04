@@ -17,7 +17,7 @@ namespace KnowledgeTester1.Forms
         private List<int> _linkedQuestionIds = new List<int>();
 
         private bool _isNavigateBack = false;
-        private bool _isEditingMode = false; // Чи ми редагуємо старе питання?
+        private bool _isEditingMode = false;
 
         public QuestionEditorForm(List<int> testIds, Form parentForm, int? mainQuestionId = null)
         {
@@ -32,7 +32,6 @@ namespace KnowledgeTester1.Forms
 
             if (_mainQuestionId != null)
             {
-                // Це режим редагування вже існуючого питання
                 _isEditingMode = true;
 
                 LoadQuestionText();

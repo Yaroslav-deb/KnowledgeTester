@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
-using Font = System.Drawing.Font; // Вирішує проблему з Ambiguous Font
+using Font = System.Drawing.Font;
 
 namespace KnowledgeTester1.Forms
 {
@@ -31,7 +31,7 @@ namespace KnowledgeTester1.Forms
             dgvAvailable = new DataGridView();
             tabHistory = new TabPage();
             dgvHistory = new DataGridView();
-            btnViewStats = new Button(); // 1. Ініціалізація
+            btnViewStats = new Button();
 
             tabControl.SuspendLayout();
             tabAvailable.SuspendLayout();
@@ -39,7 +39,6 @@ namespace KnowledgeTester1.Forms
             tabHistory.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvHistory).BeginInit();
             SuspendLayout();
-
             // 
             // ЗАГАЛЬНІ СТИЛІ ТАБЛИЦЬ
             // 
@@ -50,7 +49,6 @@ namespace KnowledgeTester1.Forms
             headerStyle.SelectionBackColor = Color.FromArgb(75, 0, 130);
             headerStyle.SelectionForeColor = SystemColors.HighlightText;
             headerStyle.WrapMode = DataGridViewTriState.True;
-
             rowStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
             rowStyle.BackColor = Color.FromArgb(50, 50, 55);
             rowStyle.Font = new Font("Segoe UI", 10F);
@@ -58,7 +56,6 @@ namespace KnowledgeTester1.Forms
             rowStyle.SelectionBackColor = Color.BlueViolet;
             rowStyle.SelectionForeColor = Color.White;
             rowStyle.WrapMode = DataGridViewTriState.False;
-
             // 
             // lblUserInfo
             // 
@@ -70,7 +67,6 @@ namespace KnowledgeTester1.Forms
             lblUserInfo.Size = new Size(113, 28);
             lblUserInfo.TabIndex = 0;
             lblUserInfo.Text = "Студент: ...";
-
             // 
             // lblSubjectInfo
             // 
@@ -82,7 +78,6 @@ namespace KnowledgeTester1.Forms
             lblSubjectInfo.Size = new Size(153, 32);
             lblSubjectInfo.TabIndex = 4;
             lblSubjectInfo.Text = "Предмет: ...";
-
             // 
             // btnExit
             // 
@@ -100,7 +95,6 @@ namespace KnowledgeTester1.Forms
             btnExit.Text = "Вийти";
             btnExit.UseVisualStyleBackColor = false;
             btnExit.Click += btnExit_Click;
-
             // 
             // btnBack
             // 
@@ -118,7 +112,6 @@ namespace KnowledgeTester1.Forms
             btnBack.Text = "Назад";
             btnBack.UseVisualStyleBackColor = false;
             btnBack.Click += btnBack_Click;
-
             // 
             // tabControl
             // 
@@ -131,7 +124,6 @@ namespace KnowledgeTester1.Forms
             tabControl.SelectedIndex = 0;
             tabControl.Size = new Size(940, 470);
             tabControl.TabIndex = 2;
-
             // 
             // tabAvailable
             // 
@@ -145,7 +137,6 @@ namespace KnowledgeTester1.Forms
             tabAvailable.Size = new Size(932, 434);
             tabAvailable.TabIndex = 0;
             tabAvailable.Text = "Доступні тести";
-
             // 
             // btnStartTest
             // 
@@ -163,7 +154,6 @@ namespace KnowledgeTester1.Forms
             btnStartTest.Text = "Почати тест";
             btnStartTest.UseVisualStyleBackColor = false;
             btnStartTest.Click += btnStartTest_Click;
-
             // 
             // dgvAvailable
             // 
@@ -187,12 +177,11 @@ namespace KnowledgeTester1.Forms
             dgvAvailable.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvAvailable.Size = new Size(890, 340);
             dgvAvailable.TabIndex = 0;
-
             // 
             // tabHistory
             // 
             tabHistory.BackColor = Color.FromArgb(30, 30, 30);
-            tabHistory.Controls.Add(btnViewStats); // 2. Додаємо на вкладку
+            tabHistory.Controls.Add(btnViewStats);
             tabHistory.Controls.Add(dgvHistory);
             tabHistory.Location = new Point(4, 32);
             tabHistory.Name = "tabHistory";
@@ -200,9 +189,8 @@ namespace KnowledgeTester1.Forms
             tabHistory.Size = new Size(932, 434);
             tabHistory.TabIndex = 1;
             tabHistory.Text = "Історія здачі";
-
             // 
-            // btnViewStats (Кнопка Статистики)
+            // btnViewStats
             // 
             btnViewStats.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnViewStats.BackColor = Color.FromArgb(72, 61, 139);
@@ -211,14 +199,13 @@ namespace KnowledgeTester1.Forms
             btnViewStats.FlatStyle = FlatStyle.Flat;
             btnViewStats.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnViewStats.ForeColor = Color.White;
-            btnViewStats.Location = new Point(710, 380); // Та сама позиція, що і "Почати тест"
+            btnViewStats.Location = new Point(710, 380);
             btnViewStats.Name = "btnViewStats";
             btnViewStats.Size = new Size(200, 40);
             btnViewStats.TabIndex = 2;
             btnViewStats.Text = "Детальна статистика";
             btnViewStats.UseVisualStyleBackColor = false;
             btnViewStats.Click += btnViewStats_Click;
-
             // 
             // dgvHistory
             // 
@@ -239,9 +226,8 @@ namespace KnowledgeTester1.Forms
             dgvHistory.RowHeadersVisible = false;
             dgvHistory.RowHeadersWidth = 51;
             dgvHistory.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvHistory.Size = new Size(890, 340); // Трохи менша висота, щоб влізла кнопка
+            dgvHistory.Size = new Size(890, 340);
             dgvHistory.TabIndex = 0;
-
             // 
             // StudentTestsForm
             // 

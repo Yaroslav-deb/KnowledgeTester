@@ -83,7 +83,6 @@ namespace KnowledgeTester1.Forms
 
                 using (var cmdStudent = conn.CreateCommand())
                 {
-                    // ќбов'€зково вит€гуЇмо class_id!
                     cmdStudent.CommandText = "SELECT id, full_name, class_id FROM Students WHERE personal_code = @pc";
                     cmdStudent.Parameters.AddWithValue("@pc", code);
 

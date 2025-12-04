@@ -50,7 +50,7 @@ namespace KnowledgeTester1.Forms
             btnExit.UseVisualStyleBackColor = false;
             btnExit.Click += btnExit_Click;
             // 
-            // flowLayoutPanel (Контейнер для плиток)
+            // flowLayoutPanel
             // 
             flowLayoutPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             flowLayoutPanel.AutoScroll = true;

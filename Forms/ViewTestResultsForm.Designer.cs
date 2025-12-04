@@ -27,18 +27,18 @@ namespace KnowledgeTester1.Forms
             ((System.ComponentModel.ISupportInitialize)dgvResults).BeginInit();
             SuspendLayout();
             // 
-            // lblTestTitle (Заголовок)
+            // lblTestTitle
             // 
             lblTestTitle.AutoSize = true;
             lblTestTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            lblTestTitle.ForeColor = Color.Plum; // Фіолетовий акцент
+            lblTestTitle.ForeColor = Color.Plum;
             lblTestTitle.Location = new Point(20, 20);
             lblTestTitle.Name = "lblTestTitle";
             lblTestTitle.Size = new Size(250, 32);
             lblTestTitle.TabIndex = 0;
             lblTestTitle.Text = "Результати тесту: ...";
             // 
-            // dgvResults (Таблиця)
+            // dgvResults
             // 
             dgvResults.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvResults.AllowUserToAddRows = false;
@@ -74,7 +74,7 @@ namespace KnowledgeTester1.Forms
             dgvResults.Size = new Size(760, 350);
             dgvResults.TabIndex = 1;
             // 
-            // btnClose (Кнопка виходу)
+            // btnClose
             // 
             btnClose.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnClose.BackColor = Color.FromArgb(72, 61, 139);

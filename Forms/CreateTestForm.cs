@@ -15,7 +15,7 @@ namespace KnowledgeTester1.Forms
 
         private List<int> _createdTestIds = new List<int>();
 
-        // ID головного тесту (першого в списку), для відображення питань у таблиці
+        // ID головного тесту, для відображення питань у таблиці
         private int _mainTestId = -1;
 
         // --- НОВА ЗМІННА ---
@@ -225,10 +225,8 @@ namespace KnowledgeTester1.Forms
             if (dgvQuestions.CurrentRow == null) return;
             int qid = Convert.ToInt32(dgvQuestions.CurrentRow.Cells["id"].Value);
 
-            // Ховаємо цю форму
             this.Hide();
 
-            // Передаємо "this" як батьківську форму і ID питання
             var f = new QuestionEditorForm(_createdTestIds, this, qid);
             f.Show();
         }
@@ -237,7 +235,6 @@ namespace KnowledgeTester1.Forms
         {
             if (dgvQuestions.CurrentRow == null) return;
 
-            // 2. Получаем ID вопроса
             int qid = Convert.ToInt32(dgvQuestions.CurrentRow.Cells["id"].Value);
 
             if (MessageBox.Show("Видалити питання?", "Підтвердження", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
@@ -245,11 +242,10 @@ namespace KnowledgeTester1.Forms
                 try
                 {
                     using var conn = DatabaseHelper.GetConnection();
-                    using var transaction = conn.BeginTransaction(); // Начинаем транзакцию
+                    using var transaction = conn.BeginTransaction();
 
                     try
                     {
-                        // КРОК 1: Видаляємо всі ВІДПОВІДІ, що прив'язані до цього питання
                         using (var cmdA = conn.CreateCommand())
                         {
                             cmdA.Transaction = transaction;
@@ -258,7 +254,6 @@ namespace KnowledgeTester1.Forms
                             cmdA.ExecuteNonQuery();
                         }
 
-                        // КРОК 2: Тепер спокійно видаляємо саме ПИТАННЯ
                         using (var cmdQ = conn.CreateCommand())
                         {
                             cmdQ.Transaction = transaction;
@@ -267,12 +262,12 @@ namespace KnowledgeTester1.Forms
                             cmdQ.ExecuteNonQuery();
                         }
 
-                        transaction.Commit(); // Применяем изменения
-                        LoadQuestions();      // Обновляем таблицу
+                        transaction.Commit();
+                        LoadQuestions();
                     }
                     catch (Exception ex)
                     {
-                        transaction.Rollback(); // Если ошибка - отменяем удаление
+                        transaction.Rollback();
                         MessageBox.Show("Помилка транзакції: " + ex.Message);
                     }
                 }
@@ -282,8 +277,6 @@ namespace KnowledgeTester1.Forms
                 }
             }
         }
-
-        // --- ДОПОМІЖНІ МЕТОДИ ---
 
         public void LoadQuestions()
         {
