@@ -71,7 +71,7 @@ namespace KnowledgeTester1.Forms
             btnSave.ForeColor = Color.White;
             btnSave.Location = new Point(30, 160);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(420, 40); // Широка кнопка на всю ширину
+            btnSave.Size = new Size(420, 40);
             btnSave.TabIndex = 2;
             btnSave.Text = "Зберегти відповідь";
             btnSave.UseVisualStyleBackColor = false;
@@ -82,13 +82,13 @@ namespace KnowledgeTester1.Forms
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(20, 20, 20); // Темний фон
+            BackColor = Color.FromArgb(20, 20, 20);
             ClientSize = new Size(480, 230);
             Controls.Add(lblAnswer);
             Controls.Add(btnSave);
             Controls.Add(chkCorrect);
             Controls.Add(txtAnswer);
-            FormBorderStyle = FormBorderStyle.FixedDialog; // Фіксований розмір діалогу
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "AnswerEditorForm";

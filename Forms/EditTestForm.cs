@@ -30,7 +30,6 @@ namespace KnowledgeTester1.Forms
             this.FormClosed += EditTestForm_FormClosed;
         }
 
-        // --- ЗАВАНТАЖЕННЯ ДАНИХ ---
 
         private void LoadClasses()
         {
@@ -90,7 +89,6 @@ namespace KnowledgeTester1.Forms
             catch { }
         }
 
-        // --- ОСНОВНІ ДІЇ ---
 
         private void btnSave_Click(object sender, EventArgs e)
         {
@@ -133,21 +131,17 @@ namespace KnowledgeTester1.Forms
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            // Просто виходимо без збереження змін у полях (title, desc).
-            // Питання зберігаються окремо в QuestionEditor, тому їх зміни вже в БД.
             _isNavigateBack = true;
             this.Close();
         }
 
-        // --- РОБОТА З ПИТАННЯМИ ---
 
         private void btnAddQuestion_Click(object sender, EventArgs e)
         {
-            // Передаємо список з ОДНОГО елемента (поточний тест)
             var f = new QuestionEditorForm(new List<int> { _testId }, this);
             f.FormClosed += (s, ev) => LoadQuestions();
             f.Show();
-            this.Hide(); // Ховаємо редактор тесту, показуємо редактор питання
+            this.Hide();
         }
 
         private void btnEditQuestion_Click(object sender, EventArgs e)
@@ -171,14 +165,12 @@ namespace KnowledgeTester1.Forms
                 try
                 {
                     using var conn = DatabaseHelper.GetConnection();
-                    // 1. Спочатку видаляємо відповіді (для надійності)
                     using (var cmdA = conn.CreateCommand())
                     {
                         cmdA.CommandText = "DELETE FROM Answers WHERE question_id = @qid";
                         cmdA.Parameters.AddWithValue("@qid", qid);
                         cmdA.ExecuteNonQuery();
                     }
-                    // 2. Видаляємо питання
                     using (var cmdQ = conn.CreateCommand())
                     {
                         cmdQ.CommandText = "DELETE FROM Questions WHERE id = @id";
@@ -191,7 +183,6 @@ namespace KnowledgeTester1.Forms
             }
         }
 
-        // --- НАВІГАЦІЯ ---
 
         private void EditTestForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -209,7 +200,6 @@ namespace KnowledgeTester1.Forms
             }
         }
 
-        // Цей метод потрібен, щоб QuestionEditorForm міг нас оновити
         public void LoadQuestionsPublic()
         {
             LoadQuestions();

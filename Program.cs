@@ -11,16 +11,28 @@ namespace KnowledgeTester
 {
     internal static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
+
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             DatabaseHelper.InitializeDatabase();
-            Application.Run(new LoginForm());
+
+            try
+            {
+                // 1. Пробуем инициализировать базу
+                DatabaseHelper.InitializeDatabase();
+
+                // 2. Запускаем форму входа
+                Application.Run(new LoginForm());
+            }
+            catch (Exception ex)
+            {
+                // ЕСЛИ ОШИБКА ЕСТЬ — МЫ ЕЕ УВИДИМ
+                MessageBox.Show("Критична помилка при запуску:\n\n" + ex.ToString(),
+                    "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

@@ -51,7 +51,7 @@ namespace KnowledgeTester1.Forms
                 table.Columns.Add("Дата здачі", typeof(string));
                 table.Columns.Add("Результат", typeof(string));
                 table.Columns.Add("Відсоток", typeof(double));
-                table.Columns.Add("Оцінка (5-бал)", typeof(int));
+                table.Columns.Add("Оцінка", typeof(int));
 
                 while (reader.Read())
                 {
@@ -92,8 +92,8 @@ namespace KnowledgeTester1.Forms
         {
             if (percent >= 90) return 5;
             if (percent >= 75) return 4;
-            if (percent >= 60) return 3;
-            if (percent >= 20) return 2;
+            if (percent >= 50) return 3;
+            if (percent >= 25) return 2;
             return 1;
         }
 

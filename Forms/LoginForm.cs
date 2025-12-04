@@ -65,8 +65,6 @@ namespace KnowledgeTester1.Forms
                         var id = reader.GetInt32(0);
                         var fullName = reader.GetString(1);
 
-                        MessageBox.Show($"Ласкаво просимо, {fullName}! (Викладач)", "Успішно", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                         var f = new TeacherForm(id, fullName);
 
                         this.Hide();
@@ -85,6 +83,7 @@ namespace KnowledgeTester1.Forms
 
                 using (var cmdStudent = conn.CreateCommand())
                 {
+                    // Обов'язково витягуємо class_id!
                     cmdStudent.CommandText = "SELECT id, full_name, class_id FROM Students WHERE personal_code = @pc";
                     cmdStudent.Parameters.AddWithValue("@pc", code);
 
@@ -95,17 +94,23 @@ namespace KnowledgeTester1.Forms
                         var fullName = reader.GetString(1);
                         var classId = reader.GetInt32(2);
 
-                        MessageBox.Show($"Ласкаво просимо, {fullName}! (Студент)", "Успішно", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        // Форма студента
-                        // var f = new StudentForm(id, classId);
+                        var f = new StudentForm(id, fullName, classId);
+
                         this.Hide();
-                        // f.FormClosed += (s, ev) => this.Show();
-                        // f.Show();
+
+                        f.FormClosed += (s, ev) =>
+                        {
+                            this.Show();
+                            this.txtCode.Clear();
+                            this.txtCode.Focus();
+                        };
+
+                        f.Show();
                         return;
                     }
                 }
 
-                MessageBox.Show("Користувач з таким кодом не знайден.", "Помилка входа", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Користувач з таким кодом не знайден.", "Помилка входа", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {

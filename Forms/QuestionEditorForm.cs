@@ -63,10 +63,8 @@ namespace KnowledgeTester1.Forms
                     {
                         createForm.LoadQuestions();
                     }
-                    // Якщо батько - це форма редагування
                     else if (_parentForm is EditTestForm editForm)
                     {
-                        // Потрібно додати публічний метод у EditTestForm (див. кінець коду вище)
                         editForm.LoadQuestionsPublic();
                     }
 
@@ -85,13 +83,8 @@ namespace KnowledgeTester1.Forms
             this.Close();
         }
 
-        // --- ВИПРАВЛЕНА КНОПКА СКАСУВАТИ ---
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            // Ми видаляємо питання ТІЛЬКИ якщо:
-            // 1. Ми його створили щойно (_mainQuestionId != null)
-            // 2. Це НЕ режим редагування старого питання (!_isEditingMode)
-
             if (_mainQuestionId != null && !_isEditingMode)
             {
                 if (MessageBox.Show("Скасувати створення питання? Воно буде видалене.", "Скасування",
@@ -100,12 +93,10 @@ namespace KnowledgeTester1.Forms
                     try
                     {
                         using var conn = DatabaseHelper.GetConnection();
-                        using var transaction = conn.BeginTransaction(); // Транзакція обов'язкова
+                        using var transaction = conn.BeginTransaction();
 
-                        // Проходимо по всіх копіях питання (для кожного класу)
                         foreach (int qid in _linkedQuestionIds)
                         {
-                            // 1. Спочатку видаляємо ВІДПОВІДІ (щоб не було помилки FK)
                             using (var cmdA = conn.CreateCommand())
                             {
                                 cmdA.Transaction = transaction;
@@ -114,7 +105,6 @@ namespace KnowledgeTester1.Forms
                                 cmdA.ExecuteNonQuery();
                             }
 
-                            // 2. Тепер видаляємо саме ПИТАННЯ
                             using (var cmdQ = conn.CreateCommand())
                             {
                                 cmdQ.Transaction = transaction;
@@ -129,7 +119,6 @@ namespace KnowledgeTester1.Forms
                     catch (Exception ex)
                     {
                         MessageBox.Show("Помилка при скасуванні: " + ex.Message);
-                        // Навіть якщо помилка, спробуємо вийти
                     }
 
                     _isNavigateBack = true;
@@ -138,13 +127,11 @@ namespace KnowledgeTester1.Forms
             }
             else
             {
-                // Якщо нічого не створювали або редагуємо старе - просто виходимо
                 _isNavigateBack = true;
                 this.Close();
             }
         }
 
-        // ... РЕШТА КОДУ (Load, Save, Answers) ...
 
         private void ToggleAnswerButtons(bool enabled)
         {
@@ -184,14 +171,12 @@ namespace KnowledgeTester1.Forms
                 using var conn = DatabaseHelper.GetConnection();
                 using var transaction = conn.BeginTransaction();
 
-                // Очищаємо список, щоб перезаповнити актуальними ID (або новими, або тими ж)
                 if (_mainQuestionId == null) _linkedQuestionIds.Clear();
 
                 try
                 {
                     if (_mainQuestionId == null)
                     {
-                        // --- СТВОРЕННЯ НОВОГО ---
                         for (int i = 0; i < _testIds.Count; i++)
                         {
                             using var cmd = conn.CreateCommand();
@@ -207,7 +192,6 @@ namespace KnowledgeTester1.Forms
                     }
                     else
                     {
-                        // --- РЕДАГУВАННЯ ---
                         using var cmd = conn.CreateCommand();
                         cmd.Transaction = transaction;
                         cmd.CommandText = "UPDATE Questions SET question_text = @text WHERE id = @id";
@@ -215,7 +199,6 @@ namespace KnowledgeTester1.Forms
                         cmd.Parameters.AddWithValue("@id", _mainQuestionId);
                         cmd.ExecuteNonQuery();
 
-                        // При редагуванні ми працюємо тільки з одним ID, бо не знаємо ID копій
                         if (!_linkedQuestionIds.Contains(_mainQuestionId.Value))
                             _linkedQuestionIds.Add(_mainQuestionId.Value);
                     }
@@ -286,7 +269,6 @@ namespace KnowledgeTester1.Forms
                 {
                     using var conn = DatabaseHelper.GetConnection();
                     using var cmd = conn.CreateCommand();
-                    // Відповіді не мають залежних таблиць, тому тут просто DELETE FROM Answers
                     cmd.CommandText = "DELETE FROM Answers WHERE id = @id";
                     cmd.Parameters.AddWithValue("@id", ansId);
                     cmd.ExecuteNonQuery();
@@ -319,7 +301,6 @@ namespace KnowledgeTester1.Forms
                     for (int i = 1; i < _linkedQuestionIds.Count; i++)
                     {
                         int targetQId = _linkedQuestionIds[i];
-                        // Видаляємо старі відповіді (щоб не було дублів)
                         using (var cmdDel = conn.CreateCommand())
                         {
                             cmdDel.Transaction = transaction;
@@ -327,7 +308,6 @@ namespace KnowledgeTester1.Forms
                             cmdDel.Parameters.AddWithValue("@qid", targetQId);
                             cmdDel.ExecuteNonQuery();
                         }
-                        // Вставляємо нові
                         foreach (var ans in mainAnswers)
                         {
                             using (var cmdIns = conn.CreateCommand())

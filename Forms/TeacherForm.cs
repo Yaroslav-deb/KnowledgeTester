@@ -141,8 +141,11 @@ namespace KnowledgeTester1.Forms
                 return;
             }
 
-            if (MessageBox.Show("Видалити тест?", "Підтвердження", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+            if (MessageBox.Show("Видалити тест? Увага: Всі результати студентів по цьому тесту також будуть видалені!",
+                "Підтвердження", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
                 return;
+
+            SqliteConnection.ClearAllPools();
 
             try
             {
@@ -154,9 +157,7 @@ namespace KnowledgeTester1.Forms
                     using (var cmdDelAnswers = conn.CreateCommand())
                     {
                         cmdDelAnswers.Transaction = transaction;
-                        cmdDelAnswers.CommandText = @"
-                    DELETE FROM Answers 
-                    WHERE question_id IN (SELECT id FROM Questions WHERE test_id = @tid)";
+                        cmdDelAnswers.CommandText = @"DELETE FROM Answers WHERE question_id IN (SELECT id FROM Questions WHERE test_id = @tid)";
                         cmdDelAnswers.Parameters.AddWithValue("@tid", testId);
                         cmdDelAnswers.ExecuteNonQuery();
                     }
@@ -169,6 +170,14 @@ namespace KnowledgeTester1.Forms
                         cmdDelQuestions.ExecuteNonQuery();
                     }
 
+                    using (var cmdDelResults = conn.CreateCommand())
+                    {
+                        cmdDelResults.Transaction = transaction;
+                        cmdDelResults.CommandText = "DELETE FROM Results WHERE test_id = @tid";
+                        cmdDelResults.Parameters.AddWithValue("@tid", testId);
+                        cmdDelResults.ExecuteNonQuery();
+                    }
+
                     using (var cmdDelTest = conn.CreateCommand())
                     {
                         cmdDelTest.Transaction = transaction;
@@ -178,6 +187,7 @@ namespace KnowledgeTester1.Forms
                     }
 
                     transaction.Commit();
+
                     LoadTests();
                 }
                 catch

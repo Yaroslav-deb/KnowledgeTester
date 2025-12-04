@@ -71,7 +71,6 @@ namespace KnowledgeTester1.Forms
 
                 cmd.ExecuteNonQuery();
 
-                // Важливо для батьківської форми!
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

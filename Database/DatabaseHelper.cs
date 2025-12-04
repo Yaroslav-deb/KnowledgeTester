@@ -13,7 +13,8 @@ namespace KnowledgeTester1.Database
         private static readonly string DbFolder = Path.Combine(ProjectDir, "Database");
         private static readonly string DbPath = Path.Combine(DbFolder, "school.db");
 
-        public static string ConnectionString => $"Data Source={DbPath}";
+        // 1. ДОДАЛИ Timeout=30 (чекати до 30 секунд, якщо база зайнята, замість миттєвого вильоту)
+        public static string ConnectionString => $"Data Source={DbPath};Default Timeout=30;";
 
         public static void InitializeDatabase()
         {
@@ -22,8 +23,10 @@ namespace KnowledgeTester1.Database
                 if (!Directory.Exists(DbFolder))
                     Directory.CreateDirectory(DbFolder);
 
+                // Перевіряємо, чи існує файл
                 bool needInit = !File.Exists(DbPath);
 
+                // Якщо файлу немає, створюємо його порожнім
                 if (needInit)
                 {
                     using (var connection = new SqliteConnection(ConnectionString))
@@ -38,7 +41,11 @@ namespace KnowledgeTester1.Database
 
                     using (var cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = "PRAGMA foreign_keys = ON;";
+                        // 2. ВМИКАЄМО РЕЖИМ WAL (Дозволяє паралельний доступ без блокувань)
+                        cmd.CommandText = @"
+                            PRAGMA journal_mode = WAL;
+                            PRAGMA foreign_keys = ON;
+                        ";
                         cmd.ExecuteNonQuery();
                     }
 
@@ -53,6 +60,8 @@ namespace KnowledgeTester1.Database
             catch (Exception ex)
             {
                 MessageBox.Show("Помилка ініціалізації БД: " + ex.Message);
+                // Тут можна не робити throw, щоб дати програмі шанс запуститися, 
+                // але краще знати про проблему.
                 throw;
             }
         }
@@ -62,6 +71,7 @@ namespace KnowledgeTester1.Database
             var conn = new SqliteConnection(ConnectionString);
             conn.Open();
 
+            // Для кожного нового з'єднання переконуємося, що FK увімкнені
             using (var cmd = conn.CreateCommand())
             {
                 cmd.CommandText = "PRAGMA foreign_keys = ON;";
